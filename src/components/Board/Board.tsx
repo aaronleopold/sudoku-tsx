@@ -3,6 +3,19 @@ import styled from "styled-components";
 import Tile from "../Tile/Tile";
 import { Cell } from "../Cell/Cell";
 
+// index: tile number, arr[index]: tiles that may contain neighbors
+const tileNeighbors: number[][] = [
+  [0, 1, 2, 3, 6],
+  [0, 1, 2, 4, 7],
+  [0, 1, 2, 5, 8],
+  [0, 3, 4, 5, 6],
+  [1, 3, 4, 5, 7],
+  [2, 3, 4, 5, 8],
+  [0, 3, 6, 7, 8],
+  [1, 4, 7, 6, 8],
+  [2, 5, 8, 6, 7],
+];
+
 type Props = {
   board: string;
   solution: string;
@@ -21,7 +34,13 @@ const GameBoard = styled.div`
 `;
 
 export default function Board({ board, solution }: Props) {
-  // take board string, parse into array to represent tile
+  const [selectedCell, selectCell] = useState<[number, number, number]>();
+
+  // array of positions
+  const [neighbors, setNeighbors] = useState<
+    [[number, number, number]] | undefined
+  >();
+
   function parseBoardString() {
     // tile0 = [0,1,2], [9,10,11], [18,19,20]
     // tile1 = [3,4,5], [12,13,14], [21,22,23]
@@ -64,7 +83,7 @@ export default function Board({ board, solution }: Props) {
       tiles.push(tile);
     }
 
-    console.log(tiles);
+    // console.log(tiles);
     return tiles;
   }
 
@@ -79,21 +98,21 @@ export default function Board({ board, solution }: Props) {
   }
 
   function getCol(num: number): number {
-    if (num % 3 === 0) {
+    if (num === 0 || num === 3 || num === 6) {
       return 0;
-    } else if (num % 2 === 0) {
-      return 2;
-    } else {
+    } else if (num === 1 || num === 4 || num === 7) {
       return 1;
+    } else {
+      return 2;
     }
   }
 
   function generateTiles(tiles: number[][]) {
     return tiles.map((tile, index) => {
       const tileIndex = index;
-      const tileCells: Cell[] = tile.map((value, index) => {
-        const row: number = getRow(index);
-        const col: number = getCol(index);
+      const tileCells: Cell[] = tile.map((value, _index) => {
+        const row: number = getRow(_index);
+        const col: number = getCol(_index);
         const cell: Cell = {
           isFixed: value !== 0,
           value: value,
@@ -102,12 +121,25 @@ export default function Board({ board, solution }: Props) {
 
         return cell;
       });
-      return <Tile cells={tileCells} />;
+      return (
+        <Tile
+          cells={tileCells}
+          selectedCell={selectedCell}
+          selectCell={selectCell}
+          neighbors={neighbors}
+          setNeighbors={setNeighbors}
+          key={index}
+        />
+      );
     });
   }
 
   const tiles = generateTiles(parseBoardString());
-  console.log(tiles);
+  // console.log(tiles);
+
+  if (selectedCell) {
+    console.log(selectedCell);
+  }
 
   return <GameBoard>{tiles}</GameBoard>;
 }
