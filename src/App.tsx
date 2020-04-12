@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { AiOutlineRedo } from "react-icons/ai";
 import Tile from "./components/Tile";
 import styled from "styled-components";
 import Sudoku from "./lib/Sudoku";
@@ -23,6 +24,12 @@ const Options = styled.div`
   justify-content: center;
 `;
 
+const Reset = styled(AiOutlineRedo)`
+  :hover {
+    transform: scale(1.1);
+  }
+`;
+
 function App() {
   const game = useSudoku();
 
@@ -36,6 +43,23 @@ function App() {
 
   return (
     <React.Fragment>
+      <div
+        style={{
+          position: "fixed",
+          top: "1rem",
+          left: "1rem",
+          cursor: "pointer",
+        }}
+      >
+        <Reset
+          size="2rem"
+          onClick={() => {
+            game.initBoard();
+            select(undefined);
+            setOptions(undefined);
+          }}
+        />
+      </div>
       <BoardShape>
         {game.getTiles().map((tile) => {
           let tileCells = [];
@@ -63,18 +87,20 @@ function App() {
         })}
       </BoardShape>
       <Options>
-        {options && options.length > 0
-          ? options.map((option) => (
-              <CellOption
-                option={option}
-                selected={selected}
-                updateValue={(pos, newValue) => {
-                  game.setCellValue(pos, newValue);
-                  setOptions(game.getOptions());
-                }}
-              />
-            ))
-          : "Select a Cell"}
+        {options && options.length > 0 ? (
+          options.map((option) => (
+            <CellOption
+              option={option}
+              selected={selected}
+              updateValue={(pos, newValue) => {
+                game.setCellValue(pos, newValue);
+                setOptions(game.getOptions());
+              }}
+            />
+          ))
+        ) : (
+          <h3>Select a Cell</h3>
+        )}
       </Options>
     </React.Fragment>
   );

@@ -13,6 +13,7 @@ const tileNeighbors: number[][] = [
 ];
 
 export default class Sudoku {
+  private puzzleString = "";
   private tiles: Tile[] = [];
   private selectedCell: Cell | undefined = undefined;
 
@@ -21,7 +22,8 @@ export default class Sudoku {
    */
   public constructor(puzzleString: string) {
     // created pub fn for reusability
-    this.initBoard(puzzleString);
+    this.puzzleString = puzzleString;
+    this.initBoard();
   }
 
   private getRow(num: number): number {
@@ -44,8 +46,8 @@ export default class Sudoku {
     }
   }
 
-  public initBoard(puzzleString: string) {
-    const raw_tiles = this.parseBoardString(puzzleString);
+  public initBoard() {
+    const raw_tiles = this.parseBoardString(this.puzzleString);
     const _tiles = raw_tiles.map((tile, index) => {
       const tileIndex = index;
       // const tileCells: Cell[] = tile.map((value, _index) => {
