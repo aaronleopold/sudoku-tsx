@@ -1,32 +1,82 @@
 import React, { useState, useEffect } from "react";
-import Board from "./components/Board/Board";
+import Tile from "./components/Tile";
+import styled from "styled-components";
+import Sudoku from "./lib/Sudoku";
+import Board from "./components/Board";
+import useSudoku from "./lib/useSudoku";
+import CellComponent from "./components/Cell";
+import CellOption from "./components/CellOption";
 
-type Puzzle = {
-  board: string;
-  solution: string;
-};
+const BoardShape = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 540px;
+  height: 540px;
+  margin: 30px auto;
+  border: 1px solid black;
+`;
+
+const Options = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+`;
 
 function App() {
-  const [puzzle, setPuzzle] = useState<Puzzle>();
+  const game = useSudoku();
 
-  useEffect(() => {
-    if (!puzzle) {
-      // load dummy board
-      const _puzzle = {
-        board:
-          "203108000800000742900720803098073060060000439031960070007805300000030607080097500",
-        solution:
-          "273148956816359742945726813498273165762581439531964278627815394159432687384697521",
-      };
+  const [selected, select] = useState(game.getSelected());
+  const [options, setOptions] = useState<number[]>();
 
-      setPuzzle(_puzzle);
-    }
-  }, [puzzle]);
+  console.log(game.getSelected());
+  console.log(game.getTiles());
 
-  return puzzle ? (
-    <Board board={puzzle?.board} solution={puzzle?.solution} />
-  ) : (
-    <div> "Loading..."</div>
+  console.log(options);
+
+  return (
+    <React.Fragment>
+      <BoardShape>
+        {game.getTiles().map((tile) => {
+          let tileCells = [];
+          for (let key in tile.cells) {
+            let cell = tile.cells[key];
+            const cellComponent = (
+              <CellComponent
+                value={cell.value}
+                isFixed={cell.isFixed}
+                pos={cell.pos}
+                updateValue={(pos, newValue) =>
+                  game.setCellValue(pos, newValue)
+                }
+                selected={selected}
+                selectCell={() => {
+                  game.selectCell(cell.pos);
+                  select(game.getSelected());
+                  setOptions(game.getOptions());
+                }}
+              />
+            );
+            tileCells.push(cellComponent);
+          }
+          return <Tile cells={tileCells} />;
+        })}
+      </BoardShape>
+      <Options>
+        {options && options.length > 0
+          ? options.map((option) => (
+              <CellOption
+                option={option}
+                selected={selected}
+                updateValue={(pos, newValue) => {
+                  game.setCellValue(pos, newValue);
+                  setOptions(game.getOptions());
+                }}
+              />
+            ))
+          : "Select a Cell"}
+      </Options>
+    </React.Fragment>
   );
 }
 
