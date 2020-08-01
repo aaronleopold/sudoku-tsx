@@ -1,6 +1,9 @@
-styling: 
-  ☐ fix border issues
-
-functionality: 
-  ☐ add on selected functionality
-  ☐ add input functionality
+solving:
+  create own implementation of solving alg
+  
+functionality:
+  add check solution feature (highlight incorrect cells, congrats message if none, etc)
+  add solve feature (solution fills board)
+  
+misc:
+  add dark mode
