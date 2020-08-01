@@ -52,68 +52,83 @@ function App() {
   });
 
   return (
-    <React.Fragment>
-      <div
+    <div>
+      <h3
         style={{
-          position: "fixed",
-          top: "1rem",
-          left: "1rem",
-          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        <Reset
-          size="2rem"
-          onClick={() => {
-            game.initBoard();
-            select(undefined);
-            setOptions(undefined);
-          }}
+        Sudoku{" "}
+        <img
+          style={{ height: "3rem", marginLeft: ".5rem" }}
+          src={require("./assets/wasm-ferris.png")}
         />
-      </div>
+      </h3>
 
-      <BoardShape>
-        {game.getTiles().map((tile) => {
-          let tileCells = [];
-          for (let key in tile.cells) {
-            let cell = tile.cells[key];
-            const cellComponent = (
-              <CellComponent
-                value={cell.value}
-                isFixed={cell.isFixed}
-                pos={cell.pos}
-                updateValue={(pos, newValue) =>
-                  game.setCellValue(pos, newValue)
-                }
+      <div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <p style={{ marginRight: ".5rem" }}>Reset board</p>
+          <Reset
+            size="2rem"
+            onClick={() => {
+              game.initBoard();
+              select(undefined);
+              setOptions(undefined);
+            }}
+          />
+        </div>
+
+        <BoardShape>
+          {game.getTiles().map((tile) => {
+            let tileCells = [];
+            for (let key in tile.cells) {
+              let cell = tile.cells[key];
+              const cellComponent = (
+                <CellComponent
+                  value={cell.value}
+                  isFixed={cell.isFixed}
+                  pos={cell.pos}
+                  updateValue={(pos, newValue) =>
+                    game.setCellValue(pos, newValue)
+                  }
+                  selected={selected}
+                  selectCell={() => {
+                    game.selectCell(cell.pos);
+                    select(game.getSelected());
+                    setOptions(game.getOptions());
+                  }}
+                />
+              );
+              tileCells.push(cellComponent);
+            }
+            return <Tile cells={tileCells} />;
+          })}
+        </BoardShape>
+        <Options>
+          {options && options.length > 0 ? (
+            options.map((option) => (
+              <CellOption
+                option={option}
                 selected={selected}
-                selectCell={() => {
-                  game.selectCell(cell.pos);
-                  select(game.getSelected());
+                updateValue={(pos, newValue) => {
+                  game.setCellValue(pos, newValue);
                   setOptions(game.getOptions());
                 }}
               />
-            );
-            tileCells.push(cellComponent);
-          }
-          return <Tile cells={tileCells} />;
-        })}
-      </BoardShape>
-      <Options>
-        {options && options.length > 0 ? (
-          options.map((option) => (
-            <CellOption
-              option={option}
-              selected={selected}
-              updateValue={(pos, newValue) => {
-                game.setCellValue(pos, newValue);
-                setOptions(game.getOptions());
-              }}
-            />
-          ))
-        ) : (
-          <h3>Select a Cell</h3>
-        )}
-      </Options>
-    </React.Fragment>
+            ))
+          ) : (
+            <h3>Select a Cell</h3>
+          )}
+        </Options>
+      </div>
+    </div>
   );
 }
 
