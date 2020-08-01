@@ -129,9 +129,15 @@ export default class Sudoku {
 
   public selectCell(pos: [number, number, number]) {
     const selectedTile = pos[0];
-    // console.log(this.tiles);
-    // this.tiles[selectedTile].cells[`${pos}`];
-    this.selectedCell = this.tiles[selectedTile].cells[`${pos}`];
+
+    if (
+      this.selectedCell &&
+      this.selectedCell.pos === this.tiles[selectedTile].cells[`${pos}`].pos
+    ) {
+      this.selectedCell = undefined;
+    } else {
+      this.selectedCell = this.tiles[selectedTile].cells[`${pos}`];
+    }
   }
 
   /**
@@ -144,7 +150,7 @@ export default class Sudoku {
 
     let targetCell = targetTile.cells[`${pos}`];
     targetCell.value = newValue;
-    console.log(targetCell.value);
+    // console.log(targetCell.value);
   }
 
   /**
@@ -163,11 +169,12 @@ export default class Sudoku {
     for (let key in selectedTile.cells) {
       tileAsArr.push(selectedTile.cells[key].value);
     }
+
     const options = all.filter((num) => {
       return tileAsArr.indexOf(num) === -1;
     });
 
-    console.log(options);
+    // console.log(options);
 
     return options;
   }

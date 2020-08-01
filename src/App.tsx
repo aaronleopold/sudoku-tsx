@@ -6,7 +6,7 @@ import Sudoku from "./lib/Sudoku";
 import Board from "./components/Board";
 import useSudoku from "./lib/useSudoku";
 import CellComponent from "./components/Cell";
-import CellOption from "./components/CellOption";
+import CellOption, { ClearOption } from "./components/CellOption";
 
 const BoardShape = styled.div`
   display: grid;
@@ -37,8 +37,8 @@ function App() {
   const [options, setOptions] = useState<number[]>();
   const [wasm, loadWasm] = useState<any>(null);
 
-  console.log(game.getSelected());
-  console.log(game.getTiles());
+  // console.log(game.getSelected());
+  // console.log(game.getTiles());
 
   // console.log(options);
 
@@ -50,6 +50,8 @@ function App() {
       // wasm.greet();
     });
   });
+
+  // console.log(selected);
 
   return (
     <div>
@@ -98,7 +100,7 @@ function App() {
                   updateValue={(pos, newValue) =>
                     game.setCellValue(pos, newValue)
                   }
-                  selected={selected}
+                  selected={selected ? selected.pos === cell.pos : false}
                   selectCell={() => {
                     game.selectCell(cell.pos);
                     select(game.getSelected());
@@ -113,16 +115,25 @@ function App() {
         </BoardShape>
         <Options>
           {options && options.length > 0 ? (
-            options.map((option) => (
-              <CellOption
-                option={option}
+            <>
+              {options.map((option) => (
+                <CellOption
+                  option={option}
+                  selected={selected}
+                  updateValue={(pos, newValue) => {
+                    game.setCellValue(pos, newValue);
+                    setOptions(game.getOptions());
+                  }}
+                />
+              ))}
+              <ClearOption
                 selected={selected}
                 updateValue={(pos, newValue) => {
                   game.setCellValue(pos, newValue);
                   setOptions(game.getOptions());
                 }}
               />
-            ))
+            </>
           ) : (
             <h3>Select a Cell</h3>
           )}
