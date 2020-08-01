@@ -14,7 +14,6 @@ const BoardShape = styled.div`
   grid-template-rows: repeat(3, 1fr);
   width: 540px;
   height: 540px;
-  margin: 30px auto;
   border: 1px solid black;
 `;
 
@@ -48,8 +47,8 @@ function App() {
     import("./wasm/solver_rs").then((wasm) => {
       loadWasm(wasm);
       // wasm.greet();
+      console.log(game.toString());
       console.log(wasm.solve(game.toString()));
-      // console.log(game.toString());
     });
   });
 
@@ -75,18 +74,30 @@ function App() {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <p style={{ marginRight: ".5rem" }}>Reset board</p>
-          <Reset
-            size="2rem"
-            onClick={() => {
-              game.initBoard();
-              select(undefined);
-              setOptions(undefined);
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <p style={{ marginRight: ".5rem" }}>Reset board</p>
+            <Reset
+              size="2rem"
+              onClick={() => {
+                game.initBoard();
+                select(undefined);
+                setOptions(undefined);
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
             }}
-          />
+          >
+            <button style={{ marginRight: ".5rem  " }}>Check Solution</button>
+            {/* <button style={{ marginRight: ".5rem  " }}>Hint</button> */}
+            <button>Solve</button>
+          </div>
         </div>
 
         <BoardShape>
@@ -136,6 +147,14 @@ function App() {
                 }}
               />
             </>
+          ) : selected ? (
+            <ClearOption
+              selected={selected}
+              updateValue={(pos, newValue) => {
+                game.setCellValue(pos, newValue);
+                setOptions(game.getOptions());
+              }}
+            />
           ) : (
             <h3>Select a Cell</h3>
           )}
