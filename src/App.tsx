@@ -35,11 +35,21 @@ function App() {
 
   const [selected, select] = useState(game.getSelected());
   const [options, setOptions] = useState<number[]>();
+  const [wasm, loadWasm] = useState<any>(null);
 
   console.log(game.getSelected());
   console.log(game.getTiles());
 
-  console.log(options);
+  // console.log(options);
+
+  // wasm.greet("Aaron");
+
+  useEffect(() => {
+    import("./wasm/solver_rs").then((wasm) => {
+      loadWasm(wasm);
+      // wasm.greet();
+    });
+  });
 
   return (
     <React.Fragment>
@@ -60,6 +70,7 @@ function App() {
           }}
         />
       </div>
+
       <BoardShape>
         {game.getTiles().map((tile) => {
           let tileCells = [];

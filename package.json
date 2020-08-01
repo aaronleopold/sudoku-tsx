@@ -11,6 +11,7 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "@types/styled-components": "^5.0.1",
+    "hello-wasm-pack": "^0.1.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-icons": "^3.9.0",
@@ -19,10 +20,13 @@
     "typescript": "~3.7.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "react-app-rewired start",
+    "build:wasm-dev": "cd solver-rs && wasm-pack build --target bundler --out-dir ../src/wasm/",
+    "build:wasm-release": "cd solver-rs && wasm-pack build --target bundler --out-dir ../src/wasm/ --release",
+    "build:react": "react-app-rewired build",
+    "build-native-dev": "wasm-pack build ./src/native --target bundler --out-dir ./src/native/build --dev",
+    "build:all-dev": "yarn build:wasm-dev && yarn build:react",
+    "build:all-release": "yarn build:wasm-release && yarn build:react"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -38,5 +42,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@wasm-tool/wasm-pack-plugin": "^1.3.1",
+    "react-app-rewired": "^2.1.6"
   }
 }
