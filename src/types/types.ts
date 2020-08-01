@@ -1,13 +1,13 @@
 export type Cell = {
   isFixed: boolean;
   value: number;
-  pos: [number, number, number];
+
+  // pos : [tileIndex, index of cell in tile]
+  pos: [number, number];
 };
 
 export type Tile = {
-  // cells: Cell[];
-  // available: number[]
-  cells: Record<string, Cell>;
+  cells: Cell[];
 };
 
 export type Board = {};

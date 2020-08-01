@@ -46,45 +46,10 @@ export default class Sudoku {
     }
   }
 
-  public initBoard() {
-    const raw_tiles = this.parseBoardString(this.puzzleString);
-    const _tiles = raw_tiles.map((tile, index) => {
-      const tileIndex = index;
-      // const tileCells: Cell[] = tile.map((value, _index) => {
-      //   const row: number = this.getRow(_index);
-      //   const col: number = this.getCol(_index);
-      //   const cell: Cell = {
-      //     isFixed: value !== 0,
-      //     value: value,
-      //     pos: [tileIndex, row, col],
-      //   };
-
-      //   return cell;
-      // });
-      const tileCells: Record<string, Cell> = {};
-
-      tile.forEach((value, _index) => {
-        const row: number = this.getRow(_index);
-        const col: number = this.getCol(_index);
-        let cell: Cell = {
-          isFixed: value !== 0,
-          value: value,
-          pos: [tileIndex, row, col],
-        };
-
-        tileCells[`${cell.pos}`] = cell;
-      });
-
-      const currentTile: Tile = {
-        cells: tileCells,
-      };
-
-      return currentTile;
-    });
-
-    this.tiles = _tiles;
-  }
-
+  /**
+   * @description Takes puzzle string and parses into tiles
+   * @returns A psuedo Tile array, to be used creating real Tile type
+   */
   private parseBoardString(puzzleString: string) {
     let tiles: number[][] = [];
 
@@ -115,6 +80,145 @@ export default class Sudoku {
     return tiles;
   }
 
+  public initBoard() {
+    const raw_tiles = this.parseBoardString(this.puzzleString);
+    const _tiles = raw_tiles.map((tile, index) => {
+      const tileIndex = index;
+      let tileCells: Cell[] = [];
+
+      tile.forEach((value, index) => {
+        const row: number = this.getRow(index);
+        const col: number = this.getCol(index);
+        let cell: Cell = {
+          isFixed: value !== 0,
+          value: value,
+          pos: [tileIndex, index],
+        };
+
+        tileCells.push(cell);
+      });
+
+      const currentTile: Tile = {
+        cells: tileCells,
+      };
+
+      return currentTile;
+    });
+
+    this.tiles = _tiles;
+  }
+
+  /**
+   * @description Converts self.tiles to a string of numbers
+   * @returns String
+   */
+  public toString(): string {
+    let board_string = "";
+
+    /**
+     * this.tiles = [
+     *    [
+     *      cell,cell,cell
+     *      cell,cell,cell
+     *      cell,cell,cell
+     *    ],
+     *    etc...
+     * ]
+     *
+     *
+     */
+
+    let sudokuRow = 0;
+    let sectionRow = 0;
+    let tileStartingIndex = 0;
+    let currentTile = 0;
+
+    while (sudokuRow < 9) {
+      if (sudokuRow > 0 && sudokuRow % 3 === 0) {
+        currentTile += 3;
+        sectionRow = 0;
+        tileStartingIndex = 0;
+      }
+
+      let tileLeft = this.tiles[currentTile];
+      let tileMiddle = this.tiles[currentTile + 1];
+      let tileRight = this.tiles[currentTile + 2];
+
+      // collect left tile cells
+      for (let i = tileStartingIndex; i < tileStartingIndex + 3; i++) {
+        board_string += tileLeft.cells[i].value;
+      }
+
+      // collect middle tile cells
+      for (let i = tileStartingIndex; i < tileStartingIndex + 3; i++) {
+        board_string += tileMiddle.cells[i].value;
+      }
+
+      // collect right tile cells
+      for (let i = tileStartingIndex; i < tileStartingIndex + 3; i++) {
+        board_string += tileRight.cells[i].value;
+      }
+
+      sudokuRow += 1;
+      sectionRow += 1;
+      tileStartingIndex += 3;
+    }
+
+    // for (let currentRow = 0; currentRow < 9; currentRow++) {
+    //   if (currentRow >= 0 && currentRow <= 2) {
+    //     let tileOne = this.tiles[0];
+    //     let tileTwo = this.tiles[1];
+    //     let tileThree = this.tiles[2];
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileOne.cells[i].value;
+    //     }
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileTwo.cells[i].value;
+    //     }
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileThree.cells[i].value;
+    //     }
+    //   } else if (currentRow >= 3 && currentRow <= 5) {
+    //     let tileFour = this.tiles[3];
+    //     let tileFive = this.tiles[4];
+    //     let tileSix = this.tiles[5];
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileFour.cells[i].value;
+    //     }
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileFive.cells[i].value;
+    //     }
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileSix.cells[i].value;
+    //     }
+    //   } else {
+    //     let tileSeven = this.tiles[6];
+    //     let tileEight = this.tiles[7];
+    //     let tileNine = this.tiles[0];
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileSeven.cells[i].value;
+    //     }
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileEight.cells[i].value;
+    //     }
+
+    //     for (let i = 0; i < 3; i++) {
+    //       board_string += tileNine.cells[i].value;
+    //     }
+    //   }
+    // }
+
+    return board_string.replace(/0/g, ".");
+  }
+
   /**
    * @description helper with rendering
    * @returns the array of tiles to be used for rendering
@@ -127,16 +231,16 @@ export default class Sudoku {
     return this.selectedCell;
   }
 
-  public selectCell(pos: [number, number, number]) {
+  public selectCell(pos: [number, number]) {
     const selectedTile = pos[0];
 
     if (
       this.selectedCell &&
-      this.selectedCell.pos === this.tiles[selectedTile].cells[`${pos}`].pos
+      this.selectedCell.pos === this.tiles[selectedTile].cells[pos[1]].pos
     ) {
       this.selectedCell = undefined;
     } else {
-      this.selectedCell = this.tiles[selectedTile].cells[`${pos}`];
+      this.selectedCell = this.tiles[selectedTile].cells[pos[1]];
     }
   }
 
@@ -145,10 +249,10 @@ export default class Sudoku {
    * @param pos the position of the selected cell
    * @param newValue the new value for the selected cell
    */
-  public setCellValue(pos: [number, number, number], newValue: number) {
+  public setCellValue(pos: [number, number], newValue: number) {
     let targetTile = this.tiles[pos[0]];
 
-    let targetCell = targetTile.cells[`${pos}`];
+    let targetCell = targetTile.cells[pos[1]];
     targetCell.value = newValue;
     // console.log(targetCell.value);
   }

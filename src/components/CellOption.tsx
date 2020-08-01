@@ -5,12 +5,12 @@ import { Cell } from "../types/types";
 type CellOptionProps = {
   option: number;
   selected: Cell | undefined;
-  updateValue(pos: [number, number, number], newValue: number): void;
+  updateValue(pos: [number, number], newValue: number): void;
 };
 
 type ClearProps = {
   selected: Cell | undefined;
-  updateValue(pos: [number, number, number], newValue: number): void;
+  updateValue(pos: [number, number], newValue: number): void;
 };
 
 const OptionValue = styled.p`

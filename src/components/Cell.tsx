@@ -5,11 +5,11 @@ import { Cell } from "../types/types";
 type Props = {
   value: number;
   isFixed: boolean;
-  pos: [number, number, number];
+  pos: [number, number];
   selected: boolean;
 
-  updateValue(pos: [number, number, number], newValue: number): void;
-  selectCell(pos: [number, number, number]): void;
+  updateValue(pos: [number, number], newValue: number): void;
+  selectCell(pos: [number, number]): void;
 };
 
 const CellShapeFixed = styled.div`

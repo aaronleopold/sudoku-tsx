@@ -48,6 +48,8 @@ function App() {
     import("./wasm/solver_rs").then((wasm) => {
       loadWasm(wasm);
       // wasm.greet();
+      console.log(wasm.solve(game.toString()));
+      // console.log(game.toString());
     });
   });
 
