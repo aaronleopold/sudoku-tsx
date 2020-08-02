@@ -4,6 +4,7 @@ solving:
 functionality:
   add check solution feature (highlight incorrect cells, congrats message if none, etc)
   add solve feature (solution fills board)
+  fix neighbor cell calculations (i.e. selected cell has 'neighbors' of cells in same row / col)
   
 misc:
   add dark mode
