@@ -5,6 +5,7 @@ import { Cell } from "../types/types";
 type Props = {
   value: number;
   isFixed: boolean;
+  isNeighbor: boolean;
   pos: [number, number];
   selected: boolean;
 
@@ -29,6 +30,7 @@ const CellShapeFixed = styled.div`
 
 type CellShapeProps = {
   selected_cell: boolean;
+  isNeighbor: boolean;
 };
 
 const CellShape = styled.div`
@@ -42,8 +44,12 @@ const CellShape = styled.div`
     "s4 s5 s6"
     "s7 s8 s9";
 
-  background-color: ${(props: CellShapeProps) =>
-    props.selected_cell ? "rgba(147, 112, 219, 0.25)" : "#fff"};
+  background-color: ${({ selected_cell, isNeighbor }: CellShapeProps) =>
+    selected_cell
+      ? "rgba(147, 112, 219, 0.35)"
+      : isNeighbor
+      ? "rgba(147, 112, 219, 0.15)"
+      : "#fff"};
 
   :hover {
     background-color: rgba(147, 112, 219, 0.25);
@@ -56,6 +62,7 @@ const CellValue = styled.p``;
 export default function CellComponent({
   value,
   isFixed,
+  isNeighbor,
   pos,
   selected,
   updateValue,
@@ -68,6 +75,7 @@ export default function CellComponent({
   ) : (
     <CellShape
       selected_cell={selected}
+      isNeighbor={isNeighbor}
       onClick={() => {
         selectCell(pos);
         // updateValue(pos, 5);

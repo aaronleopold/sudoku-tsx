@@ -33,6 +33,9 @@ function App() {
   const game = useSudoku();
 
   const [selected, select] = useState(game.getSelected());
+  const [neighbors, setNeighbors] = useState<Map<[number, number], boolean>>(
+    new Map()
+  );
   const [options, setOptions] = useState<number[]>();
   const [wasm, loadWasm] = useState<any>(null);
 
@@ -47,12 +50,21 @@ function App() {
     import("./wasm/solver_rs").then((wasm) => {
       loadWasm(wasm);
       // wasm.greet();
-      console.log(game.toString());
-      console.log(wasm.solve(game.toString()));
+      // console.log(game.toString());
+      // console.log(wasm.solve(game.toString()));
     });
-  });
+  }, []);
 
   // console.log(selected);
+
+  // if (selected && !neighbors) {
+  //   console.log("setting now");
+  //   setNeighbors(game.getNeighbors(selected.pos));
+  //   // neighbors.forEach((cell) => {
+  //   //   console.log(cell.pos);
+  //   // });
+  //   console.log(neighbors!.size);
+  // }
 
   return (
     <div>
@@ -110,6 +122,9 @@ function App() {
                   value={cell.value}
                   isFixed={cell.isFixed}
                   pos={cell.pos}
+                  isNeighbor={
+                    neighbors && neighbors.has(cell.pos) ? true : false
+                  }
                   updateValue={(pos, newValue) =>
                     game.setCellValue(pos, newValue)
                   }
@@ -118,6 +133,7 @@ function App() {
                     game.selectCell(cell.pos);
                     select(game.getSelected());
                     setOptions(game.getOptions());
+                    setNeighbors(game.getNeighbors());
                   }}
                 />
               );

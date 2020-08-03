@@ -1,21 +1,16 @@
 import { Cell, Tile } from "../types/types";
-
-const tileNeighbors: number[][] = [
-  [0, 1, 2, 3, 6],
-  [0, 1, 2, 4, 7],
-  [0, 1, 2, 5, 8],
-  [0, 3, 4, 5, 6],
-  [1, 3, 4, 5, 7],
-  [2, 3, 4, 5, 8],
-  [0, 3, 6, 7, 8],
-  [1, 4, 7, 6, 8],
-  [2, 5, 8, 6, 7],
-];
+import {
+  tileNeighbors,
+  internalNeighbors,
+  adjNeighbors,
+  vertNeighbors,
+} from "./relationships";
 
 export default class Sudoku {
   private puzzleString = "";
   private tiles: Tile[] = [];
   private selectedCell: Cell | undefined = undefined;
+  private selectedNeighbors: Map<[number, number], boolean> = new Map();
 
   /**
    * @param puzzleString string representing the sudoku puzzle
@@ -164,58 +159,7 @@ export default class Sudoku {
       tileStartingIndex += 3;
     }
 
-    // for (let currentRow = 0; currentRow < 9; currentRow++) {
-    //   if (currentRow >= 0 && currentRow <= 2) {
-    //     let tileOne = this.tiles[0];
-    //     let tileTwo = this.tiles[1];
-    //     let tileThree = this.tiles[2];
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileOne.cells[i].value;
-    //     }
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileTwo.cells[i].value;
-    //     }
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileThree.cells[i].value;
-    //     }
-    //   } else if (currentRow >= 3 && currentRow <= 5) {
-    //     let tileFour = this.tiles[3];
-    //     let tileFive = this.tiles[4];
-    //     let tileSix = this.tiles[5];
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileFour.cells[i].value;
-    //     }
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileFive.cells[i].value;
-    //     }
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileSix.cells[i].value;
-    //     }
-    //   } else {
-    //     let tileSeven = this.tiles[6];
-    //     let tileEight = this.tiles[7];
-    //     let tileNine = this.tiles[0];
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileSeven.cells[i].value;
-    //     }
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileEight.cells[i].value;
-    //     }
-
-    //     for (let i = 0; i < 3; i++) {
-    //       board_string += tileNine.cells[i].value;
-    //     }
-    //   }
-    // }
-
+    // rust library requires . for empty slots
     return board_string.replace(/0/g, ".");
   }
 
@@ -227,10 +171,26 @@ export default class Sudoku {
     return this.tiles;
   }
 
+  /**
+   * @description get object's selected cell
+   * @returns this' current selected cell
+   */
   public getSelected() {
     return this.selectedCell;
   }
 
+  /**
+   * @description get object's current neighbors
+   * @returns this' neighbors to selected cell
+   */
+  public getNeighbors(): Map<[number, number], boolean> {
+    return this.selectedNeighbors;
+  }
+
+  /**
+   * @description helper with rendering
+   * @returns the array of tiles to be used for rendering
+   */
   public selectCell(pos: [number, number]) {
     const selectedTile = pos[0];
 
@@ -239,8 +199,10 @@ export default class Sudoku {
       this.selectedCell.pos === this.tiles[selectedTile].cells[pos[1]].pos
     ) {
       this.selectedCell = undefined;
+      this.selectedNeighbors.clear();
     } else {
       this.selectedCell = this.tiles[selectedTile].cells[pos[1]];
+      this.setNeighbors(pos);
     }
   }
 
@@ -258,11 +220,75 @@ export default class Sudoku {
   }
 
   /**
-   * @description gets adjacent and perpendicular cells to selected
-   * @param pos refers to current selected cell
-   * @returns array of positions for neighboring cells to selected
+   * @description determines whether pos2 is next to pos1
+   * @param pos1 the index of current tile
+   * @param pos2 the index of comparing tile
+   * @returns boolean
    */
-  public getNeighbors(pos: [number, number, number]) {}
+  private tileIsAdjacent(pos1: number, pos2: number): boolean {
+    if (pos1 <= 2 && pos2 <= 2) return true;
+    if (pos1 >= 3 && pos1 < 6 && pos2 > 2 && pos2 <= 5) return true;
+    if (pos1 >= 6 && pos2 > 5 && pos2 <= 8) return true;
+
+    // switch (pos1) {
+    //   case 0:
+    //     if (pos2 < 3) return true;
+    //   case 1:
+    //     if (pos2 === 0 || pos2 === 2) return true;
+    //   case 2:
+    //     if (pos2 === 0 || pos2 === 1) return true;
+    // }
+
+    return false;
+  }
+
+  /**
+   * @description determines whether pos2 is above/below to pos1
+   * @param pos1 the index of current tile
+   * @param pos2 the index of comparing tile
+   * @returns boolean
+   */
+  private tileIsVert(pos1: number, pos2: number): boolean {
+    return Math.abs(pos1 - pos2) % 3 === 0;
+  }
+
+  /**
+   * @description sets adjacent and perpendicular cells to selected
+   * @param pos refers to current selected cell
+   */
+  private setNeighbors(pos: [number, number]) {
+    this.selectedNeighbors.clear();
+
+    let currentTile = pos[0];
+    let cellIndex = pos[1];
+    let neighboringTiles = tileNeighbors[currentTile];
+
+    // FIXME
+    neighboringTiles.forEach((tileIndex) => {
+      if (tileIndex === currentTile) {
+        internalNeighbors[cellIndex].forEach((cindex) => {
+          this.selectedNeighbors.set(
+            this.tiles[tileIndex].cells[cindex].pos,
+            true
+          );
+        });
+      } else if (this.tileIsAdjacent(currentTile, tileIndex)) {
+        adjNeighbors[cellIndex].forEach((cindex) => {
+          this.selectedNeighbors.set(
+            this.tiles[tileIndex].cells[cindex].pos,
+            true
+          );
+        });
+      } else if (this.tileIsVert(currentTile, tileIndex)) {
+        vertNeighbors[cellIndex].forEach((cindex) => {
+          this.selectedNeighbors.set(
+            this.tiles[tileIndex].cells[cindex].pos,
+            true
+          );
+        });
+      }
+    });
+  }
 
   public getOptions() {
     if (!this.selectedCell) return [];
