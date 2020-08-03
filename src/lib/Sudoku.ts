@@ -82,8 +82,6 @@ export default class Sudoku {
       let tileCells: Cell[] = [];
 
       tile.forEach((value, index) => {
-        const row: number = this.getRow(index);
-        const col: number = this.getCol(index);
         let cell: Cell = {
           isFixed: value !== 0,
           value: value,
@@ -101,6 +99,47 @@ export default class Sudoku {
     });
 
     this.tiles = _tiles;
+  }
+
+  public solve(solvedStr: string) {
+    let tileIndex = 0;
+    for (let i: number = 0; i < 61; i += 3) {
+      if (i === 9) i = 27;
+      else if (i === 36) i = 54;
+
+      // row 1
+      // parseInt(puzzleString[i], 10),
+      // parseInt(puzzleString[i + 1], 10),
+      // parseInt(puzzleString[i + 2], 10),
+
+      this.setCellValue([tileIndex, 0], parseInt(solvedStr[i], 10));
+      this.setCellValue([tileIndex, 1], parseInt(solvedStr[i + 1], 10));
+      this.setCellValue([tileIndex, 2], parseInt(solvedStr[i + 2], 10));
+
+      // row 2
+      // parseInt(puzzleString[i + 9], 10),
+      // parseInt(puzzleString[i + 10], 10),
+      // parseInt(puzzleString[i + 11], 10),
+
+      this.setCellValue([tileIndex, 3], parseInt(solvedStr[i + 9], 10));
+      this.setCellValue([tileIndex, 4], parseInt(solvedStr[i + 10], 10));
+      this.setCellValue([tileIndex, 5], parseInt(solvedStr[i + 11], 10));
+
+      // row 3
+      // parseInt(puzzleString[i + 18], 10),
+      // parseInt(puzzleString[i + 19], 10),
+      // parseInt(puzzleString[i + 20], 10),
+
+      this.setCellValue([tileIndex, 6], parseInt(solvedStr[i + 18], 10));
+      this.setCellValue([tileIndex, 7], parseInt(solvedStr[i + 19], 10));
+      this.setCellValue([tileIndex, 8], parseInt(solvedStr[i + 20], 10));
+
+      tileIndex += 1;
+    }
+  }
+
+  public getInitialState(): string {
+    return this.puzzleString;
   }
 
   /**
@@ -263,7 +302,6 @@ export default class Sudoku {
     let cellIndex = pos[1];
     let neighboringTiles = tileNeighbors[currentTile];
 
-    // FIXME
     neighboringTiles.forEach((tileIndex) => {
       if (tileIndex === currentTile) {
         internalNeighbors[cellIndex].forEach((cindex) => {

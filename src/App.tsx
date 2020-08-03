@@ -21,6 +21,7 @@ const Options = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
+  padding: 1rem;
 `;
 
 const Reset = styled(AiOutlineRedo)`
@@ -32,19 +33,14 @@ const Reset = styled(AiOutlineRedo)`
 function App() {
   const game = useSudoku();
 
+  const [gameState, setGameState] = useState("PLAYING");
+
   const [selected, select] = useState(game.getSelected());
   const [neighbors, setNeighbors] = useState<Map<[number, number], boolean>>(
     new Map()
   );
   const [options, setOptions] = useState<number[]>();
   const [wasm, loadWasm] = useState<any>(null);
-
-  // console.log(game.getSelected());
-  // console.log(game.getTiles());
-
-  // console.log(options);
-
-  // wasm.greet("Aaron");
 
   useEffect(() => {
     import("./wasm/solver_rs").then((wasm) => {
@@ -55,16 +51,15 @@ function App() {
     });
   }, []);
 
-  // console.log(selected);
+  function solveBoard() {
+    const solvedOriginal = wasm.solve(game.getInitialState());
+    console.log(solvedOriginal);
+    game.solve(solvedOriginal);
 
-  // if (selected && !neighbors) {
-  //   console.log("setting now");
-  //   setNeighbors(game.getNeighbors(selected.pos));
-  //   // neighbors.forEach((cell) => {
-  //   //   console.log(cell.pos);
-  //   // });
-  //   console.log(neighbors!.size);
-  // }
+    setGameState("SOLVED");
+    select(undefined);
+    setOptions(undefined);
+  }
 
   return (
     <div>
@@ -97,6 +92,7 @@ function App() {
                 game.initBoard();
                 select(undefined);
                 setOptions(undefined);
+                setGameState("PLAYING");
               }}
             />
           </div>
@@ -108,7 +104,7 @@ function App() {
           >
             <button style={{ marginRight: ".5rem  " }}>Check Solution</button>
             {/* <button style={{ marginRight: ".5rem  " }}>Hint</button> */}
-            <button>Solve</button>
+            <button onClick={() => solveBoard()}>Solve</button>
           </div>
         </div>
 
